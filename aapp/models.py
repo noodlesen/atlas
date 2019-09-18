@@ -252,7 +252,12 @@ class Inst(models.Model):
             recom = float(recoms)
         self.recom = recom
 
-        self.price = float(idict['Price'])
+        prs = idict['Price']
+        if prs == '-':
+            pr = None
+        else:
+            pr = float(idict['Price'])
+        self.price = pr
 
         self.screen_scanned = True
         self.screen_last_updated = datetime.now()
@@ -337,8 +342,12 @@ class RawData(models.Model):
 
 class FundamentalEvent(models.Model):
     """Fundamental news from companies."""
+
     def __str__(self):
-        return ('%s %s %r %r' % (self.symbol, self.name, self.value, self.date))
+        """."""
+        return (
+            '%s %s %r %r' % (self.symbol, self.name, self.value, self.date)
+        )
 
     symbol = models.CharField(max_length=10, null=True)
     simfin_id = models.IntegerField(null=True)
