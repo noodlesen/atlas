@@ -20,7 +20,7 @@ class Command(BaseCommand):
         events = FundamentalEvent.objects.all()
 
         print(len(events))
-        all_tickers = list(set([e.symbol for e in events]))
+        all_tickers = list(set([e.symbol for e in events if e.symbol != '']))
 
         print(all_tickers)
         print(len(all_tickers))

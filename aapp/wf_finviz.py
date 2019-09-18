@@ -106,19 +106,17 @@ def fv_scan_details(ticker):
 
         table = soup.find("table", class_="snapshot-table2")
 
+        header = soup.find("table", class_="fullview-title")
+
+        header_title = header.find_all("b")[0].text
+
+        full_view_links = header.find("td", class_="fullview-links")
+        links = [
+            l.text for l in full_view_links.find_all("a")
+        ]
+
         cells = table.find_all("td")
 
-        links = soup.find_all("a", class_="tab-link")
-
-        fr = None
-        to = None
-        for i, l in enumerate(links):
-            if l.text == 'monthly':
-                fr = i + 1
-            if l.text == 'financial highlights':
-                to = i
-
-        links = [l.text for l in links[fr:to]]
     except:
         print('SOMETHING WENT WRONG')
         return None
@@ -135,16 +133,16 @@ def fv_scan_details(ticker):
 
             res[name] = cells[i + 1].text
 
-    if len(links) == 4:
-        res['Company'] = links[0]
-        res['Sector'] = links[1]
-        res['Industry'] = links[2]
-        res['Country'] = links[3]
-    elif len(links) == 3:
-        res['Company'] = ticker
+    res['Company'] = header_title
+
+    if len(links) == 3:
         res['Sector'] = links[0]
         res['Industry'] = links[1]
         res['Country'] = links[2]
+    else:
+        print("WRONG NUMBER OF LINKS", len(links))
+        print(links)
+        input()
 
     print(res)
 
