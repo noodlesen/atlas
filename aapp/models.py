@@ -337,6 +337,8 @@ class RawData(models.Model):
 
 class FundamentalEvent(models.Model):
     """Fundamental news from companies."""
+    def __str__(self):
+        return ('%s %s %r %r' % (self.symbol, self.name, self.value, self.date))
 
     symbol = models.CharField(max_length=10, null=True)
     simfin_id = models.IntegerField(null=True)

@@ -1,5 +1,6 @@
 atlas/settings.py
 *.sqlite3
+*.sqlite3-journal
 aapp/fabric/images/
 aapp/fabric/HD/
 *.csv

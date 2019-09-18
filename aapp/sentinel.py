@@ -17,8 +17,8 @@ from aapp.webfront import wf_get_history, wf_get_details
 
 REGULAR = ['SPY']
 
-HIST_REFRESH_TIME = 3600 * 24  # seconds
-DTLS_REFRESH_TIME = 3600 * 24  # seconds
+HIST_REFRESH_TIME = 3600 * 24 * 30  # seconds
+DTLS_REFRESH_TIME = 3600 * 24 * 30  # seconds
 
 
 def check(symbols):
