@@ -355,3 +355,10 @@ class FundamentalEvent(models.Model):
     name = models.CharField(max_length=255, null=True)
     value = models.FloatField(null=True)
     date = models.DateField(null=True)
+
+
+class ApiCall(models.Model):
+    api = models.CharField(max_length=50, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    success = models.BooleanField(null=True)
+    response = models.ForeignKey(RawData, on_delete=models.SET_NULL, null=True)
