@@ -362,3 +362,13 @@ class ApiCall(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     success = models.BooleanField(null=True)
     response = models.ForeignKey(RawData, on_delete=models.SET_NULL, null=True)
+
+
+class Bar(models.Model):
+    o = models.FloatField(null=True)
+    c = models.FloatField(null=True)
+    h = models.FloatField(null=True)
+    l = models.FloatField(null=True)
+    v = models.IntegerField(null=True)
+    s = models.CharField(max_length=10, null=True)
+    d = models.DateField(null=True)

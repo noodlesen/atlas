@@ -11,6 +11,8 @@ from aapp.fabric.config import TS
 
 from aapp.fabric.fabric import Fabric
 
+from aapp.models import Inst
+
 USE_RANDOM = False
 
 CHANNEL = ['DIS', 'WFC', 'VZ', 'T', 'KO']
@@ -22,7 +24,8 @@ NEW = [
     'MMT', 'LION', 'ATI', 'MYGN'
 ]
 
-GENERATIONS_COUNT = 20
+GENERATIONS_COUNT = 100
+
 MUTATIONS = 70
 OUTSIDERS = 5
 DEPTH = 10
@@ -41,17 +44,20 @@ class Command(BaseCommand):
             params = load_settings_from_report('R101')
 
         symbols = []
+        #symbols = [i.ticker for i in Inst.objects.all()[10:20]]
         symbols.extend(TRENDY)
-        symbols.extend(CHANNEL)
+        # symbols.extend(CHANNEL)
         # symbols.extend(OTHER1)
-        # symbols.extend(OTHER2)
+        #symbols.extend(OTHER2)
         # symbols.extend(NEW)
 
         f = Fabric()
         f.load_data(symbols, 'ASTOCKS', 'DAILY')
-        f.trim()
+        f.map_timecode()
+        #f.trim()
         f.set_range_from_last(500)
-        if f.check():
+
+        if True: # f.check():
             generate(
                 f, GENERATIONS_COUNT, MUTATIONS, OUTSIDERS, DEPTH, STRATEGY,
                 initial_params=params, report=True, time_limit=TIME_LIMIT

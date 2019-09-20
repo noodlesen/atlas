@@ -4,7 +4,7 @@ import json
 import datetime
 import aapp.sentinel as sentinel
 
-from aapp.models import EvoReport, Inst
+from aapp.models import EvoReport, Inst, Bar
 
 
 def save_report(name):
@@ -23,6 +23,7 @@ def load_settings_from_report(path):
 def read_history_json(symbol, itype, timeframe, **kwargs):
     """Read history data from DB."""
     adj = kwargs.get('adjusted', False)
+    save_bar = kwargs.get('bar', False)
 
     if itype == 'ASTOCKS':
         if timeframe == 'DAILY':
@@ -34,42 +35,59 @@ def read_history_json(symbol, itype, timeframe, **kwargs):
             dk = "Time Series FX (60min)"
 
     if sentinel.check([symbol]):
+        
         inst = Inst.objects.get(ticker=symbol)
-        data = json.loads(inst.history)[dk]
+        hdata = json.loads(inst.history)[dk]
 
-        datalist = [{k: data[k]} for k in sorted(data.keys())]
+        src_data = [{key: hdata[key]} for key in sorted(hdata.keys())]
 
-        data = []
-        for d in datalist:
-            k = list(d.keys())[0]
+        res_data = []
+        for d in src_data:
+            dt = list(d.keys())[0]
 
             bar = {
-                "open": float(d[k]['1. open']),
-                "high": float(d[k]['2. high']),
-                "low": float(d[k]['3. low']),
+                "open": float(d[dt]['1. open']),
+                "high": float(d[dt]['2. high']),
+                "low": float(d[dt]['3. low']),
             }
 
             if timeframe in ['DAILY', 'WEEKLY', 'MONTHLY']:
-                bar["datetime"] = datetime.datetime.strptime(k, '%Y-%m-%d')
+                bar["datetime"] = datetime.datetime.strptime(dt, '%Y-%m-%d')
             else:
                 bar["datetime"] = datetime.datetime.strptime(
-                    k, '%Y-%m-%d %H:%M:%S'
+                    dt, '%Y-%m-%d %H:%M:%S'
                 )
 
             if itype == 'ASTOCKS':
                 if adj:
-                    bar["close"] = float(d[k]['5. adjusted close'])
-                    bar["volume"] = int(d[k]['6. volume'])
+                    bar["close"] = float(d[dt]['5. adjusted close'])
+                    bar["volume"] = int(d[dt]['6. volume'])
                 else:
-                    bar["close"] = float(d[k]['4. close'])
-                    bar["volume"] = int(d[k]['5. volume'])
+                    bar["close"] = float(d[dt]['4. close'])
+                    bar["volume"] = int(d[dt]['5. volume'])
 
             elif itype == 'FX':
-                bar["close"] = float(d[k]['4. close'])
+                bar["close"] = float(d[dt]['4. close'])
                 bar["volume"] = 0
 
             if bar["datetime"].weekday() != 5:
                 # исключаем субботы (для FX)
-                data.append(bar)
+                res_data.append(bar)
 
-        return data
+            if save_bar:
+                try:
+                    Bar.objects.get(d=bar['datetime'].date(), s=symbol)
+                except Bar.DoesNotExist:
+                    b = Bar()
+                    b.o = bar['open']
+                    b.c = bar['close']
+                    b.h = bar['high']
+                    b.l = bar['low']
+                    b.v = bar['volume']
+                    b.d = bar['datetime'].date()
+                    b.s = symbol
+                    b.save()
+                else:
+                    print("BAR EXISTS")
+
+        return res_data

@@ -16,11 +16,12 @@ def multitest(f, params, **kwargs):
     trades = []
     for i in range(f.range_from, f.range_to):
         for symbol in f.canvas.keys():
-            # cc = f.get(symbol)
-            TS.manage(f, symbol, trades, params)
-            trade = TS.open(f, symbol, trades, params)
-            if trade:
-                trades.append(trade)
+            cp = f.get(symbol).close_price
+            if cp is not None:
+                TS.manage(f, symbol, trades, params)
+                trade = TS.open(f, symbol, trades, params)
+                if trade:
+                    trades.append(trade)
         f.next()
 
     # inst_used = []

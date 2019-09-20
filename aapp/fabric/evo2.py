@@ -95,6 +95,7 @@ def generate(
             if ta:
                 offs.append({'input': m, 'output': ta})
 
+
         for off in offs:
 
             o_trades = off['output']['TRADES']
@@ -110,7 +111,12 @@ def generate(
             s_roi = survivor['output']['ROI']
             s_pr = survivor['output']['PROFIT']
 
+            
+
+
+
             if o_trades > 0:
+
                 o_wr = o_wins / o_trades
                 s_wr = s_wins / s_trades
 
@@ -147,12 +153,13 @@ def generate(
                 if cond:
                     survivor = deepcopy(off)
 
+
         print(json.dumps(survivor['input'], sort_keys=True, indent=4))
         print(json.dumps(survivor['output'], sort_keys=True, indent=4))
         print('\n>>>>')
-        print('\nWINRATE', '%.2f' % s_wr)
-        print('PROFIT', '%.2f' % s_pr)
-        print('ROI', '%.2f' % s_roi)
+        # print('\nWINRATE', '%.2f' % s_wr)
+        # print('PROFIT', '%.2f' % s_pr)
+        # print('ROI', '%.2f' % s_roi)
 
         now = datetime.now()
         elapsed = (now - st_time).total_seconds()

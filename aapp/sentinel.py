@@ -25,7 +25,7 @@ def check(symbols):
     """Check if instrument's data exists in the system."""
     sleep_time = 10
     success = True
-    symbols.extend(REGULAR)
+    #symbols.extend(REGULAR)
     for s in symbols:
         exists = False
         print('checking', s)

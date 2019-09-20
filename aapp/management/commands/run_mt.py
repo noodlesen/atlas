@@ -26,13 +26,14 @@ class Command(BaseCommand):
         #     'EXPO', 'TLP', 'MMT', 'LION', 'ATI', 'MYGN'
         # ]
         # symbols = ['BA', 'ADBE', 'CAT', 'INTC', 'AAPL']
-        symbols = ["AAPL"]
+        symbols = ['BA', 'ADBE', 'CAT', 'INTC', 'AAPL']
         f = Fabric()
         f.load_data(symbols, 'ASTOCKS', 'DAILY')
-        f.trim()
-        if f.check():
-            f.set_range_from_last(500)
-            params = load_settings_from_report('atest')
-            print(params)
-            r = multitest(f, params, draw=True, verbose=True)
-            print(r)
+        f.map_timecode()
+        #f.trim()
+        #if f.check():
+        f.set_range_from_last(500)
+        params = load_settings_from_report('R101')
+        print(params)
+        r = multitest(f, params, draw=True, verbose=True)
+        print(r)

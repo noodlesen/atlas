@@ -41,6 +41,7 @@ class Asset():
 
     def load_asset(self, symbol, itype, timeframe):
         """Load historical data from DB/server."""
+        print('loading', symbol)
         self.data = read_history_json(symbol, itype, timeframe)
         if self.data is None:
             return False
@@ -93,22 +94,25 @@ class Asset():
         data_to = None
         p = 0
         for tc in tcmap:
-            if tc['datetime'] == self.data[p]["datetime"]:
-                tc["open"] = self.data[p]["open"]
-                tc["open"] = self.data[p]["close"]
-                tc["open"] = self.data[p]["high"]
-                tc["open"] = self.data[p]["low"]
-                filled += 1
+            #print('P', p, self.count)
+            if p < self.count:
+                if tc['datetime'] == self.data[p]["datetime"]:
+                    tc["open"] = self.data[p]["open"]
+                    tc["close"] = self.data[p]["close"]
+                    tc["high"] = self.data[p]["high"]
+                    tc["low"] = self.data[p]["low"]
+                    tc["volume"] = self.data[p]["volume"]
+                    filled += 1
 
-                if data_from is None:
-                    data_from = tc['datetime']
+                    if data_from is None:
+                        data_from = tc['datetime']
 
-                data_to = tc['datetime']
+                    data_to = tc['datetime']
 
-                p += 1
+                    p += 1
 
-            elif tc['datetime'] > self.data[p]["datetime"]:
-                p += 1
+                elif tc['datetime'] > self.data[p]["datetime"]:
+                    p += 1
 
         print(self.symbol, old_data_length, filled)
         if old_data_length == filled:
