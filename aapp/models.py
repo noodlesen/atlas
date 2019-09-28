@@ -1,7 +1,4 @@
 """Atlas app Django models."""
-import json
-
-from datetime import datetime
 
 from django.db import models
 
@@ -37,232 +34,246 @@ class Country(models.Model):
         return(self.name)
 
 
-class InstType(models.Model):
-    """Type of an instrument."""
+# class InstType(models.Model):
+#     """Type of an instrument."""
 
-    TYPE_CHOICES = (('stock', 'Stock'),)
-    name = models.CharField(max_length=20, choices=TYPE_CHOICES)
+#     TYPE_CHOICES = (('stock', 'Stock'),)
+#     name = models.CharField(max_length=20, choices=TYPE_CHOICES)
 
-    def __str__(self):
-        """."""
-        return(self.name)
+#     def __str__(self):
+#         """."""
+#         return(self.name)
 
 
-class Inst(models.Model):
+class Stock(models.Model):
     """A trading instrument itself."""
 
-    # No.    Ticker  Company Sector  Industry    Country Market Cap  P/E Fwd
-    # P/E P/B Dividend    Recom   Price
-
     def __str__(self):
         """."""
-        return('%s [%s]' % (self.company, self.ticker))
+        return('%s [%s]' % (self.company, self.symbol))
 
     company = models.CharField(max_length=100, null=True)
-    ticker = models.CharField(max_length=10, null=True)
+    symbol = models.CharField(max_length=10, null=True)
     industry = models.ForeignKey(Industry, on_delete=models.CASCADE, null=True)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
-    market_cap = models.FloatField(null=True)
-    pe = models.FloatField(null=True)
-    fwd_pe = models.FloatField(null=True)
-    pb = models.FloatField(null=True)
-    dividend = models.FloatField(null=True)
-    recom = models.FloatField(null=True)
-    price = models.FloatField(null=True)
-    peg = models.FloatField(null=True)
-    eps = models.FloatField(null=True)
-    eps_this_year_growth = models.FloatField(null=True)
-    eps_next_year = models.FloatField(null=True)
-    eps_next_year_growth = models.FloatField(null=True)
-    sales_past_5years_growth = models.FloatField(null=True)
-    inst_own = models.FloatField(null=True)
-    roa = models.FloatField(null=True)
-    roe = models.FloatField(null=True)
-    net_margin = models.FloatField(null=True)
-    op_margin = models.FloatField(null=True)
+    # country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
 
-    hist_last_update = models.DateTimeField(null=True)
-    # screen_last_update = models.DateTimeField(null=True)
-    details_last_update = models.DateTimeField(null=True)
 
-    details = models.TextField(null=True)
+# OUTDATED
+# class Inst(models.Model):
+#     """A trading instrument itself (legacy)."""
 
-    history = models.TextField(null=True)
-    hist_from = models.DateField(null=True)
-    hist_to = models.DateField(null=True)
+#     # No.    Ticker  Company Sector  Industry    Country Market Cap  P/E Fwd
+#     # P/E P/B Dividend    Recom   Price
 
-    inst_type = models.ForeignKey(
-        InstType, on_delete=models.CASCADE, null=True
-    )
+#     def __str__(self):
+#         """."""
+#         return('%s [%s]' % (self.company, self.ticker))
 
-    def is_up_to_date(self):
-        """Check if all the data is up to date."""
-        res = False
-        if self.hist_last_update and (
-            self.hist_last_update - datetime.now()
-        ).seconds < 24 * 3600:
-            if self.details_last_update and (
-                self.details_last_update - datetime.now()
-            ).seconds < 24 * 3600:
-                res = True
-        return res
+#     company = models.CharField(max_length=100, null=True)
+#     ticker = models.CharField(max_length=10, null=True)
+#     industry = models.ForeignKey(Industry, on_delete=models.CASCADE, null=True)
+#     country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
+#     market_cap = models.FloatField(null=True)
+#     pe = models.FloatField(null=True)
+#     fwd_pe = models.FloatField(null=True)
+#     pb = models.FloatField(null=True)
+#     dividend = models.FloatField(null=True)
+#     recom = models.FloatField(null=True)
+#     price = models.FloatField(null=True)
+#     peg = models.FloatField(null=True)
+#     eps = models.FloatField(null=True)
+#     eps_this_year_growth = models.FloatField(null=True)
+#     eps_next_year = models.FloatField(null=True)
+#     eps_next_year_growth = models.FloatField(null=True)
+#     sales_past_5years_growth = models.FloatField(null=True)
+#     inst_own = models.FloatField(null=True)
+#     roa = models.FloatField(null=True)
+#     roe = models.FloatField(null=True)
+#     net_margin = models.FloatField(null=True)
+#     op_margin = models.FloatField(null=True)
 
-    def parse(self):
-        """Parse self-related screener results from it's own raw data."""
-        idict = json.loads(self.details)
+#     hist_last_update = models.DateTimeField(null=True)
+#     # screen_last_update = models.DateTimeField(null=True)
+#     details_last_update = models.DateTimeField(null=True)
 
-        self.company = idict['Company']
+#     details = models.TextField(null=True)
 
-        try:
-            country = Country.objects.get(name=idict['Country'])
-        except Country.DoesNotExist:
-            country = Country(name=idict['Country'])
-            country.save()
+#     history = models.TextField(null=True)
+#     hist_from = models.DateField(null=True)
+#     hist_to = models.DateField(null=True)
 
-        try:
-            sector = Sector.objects.get(name=idict['Sector'])
-        except Sector.DoesNotExist:
-            sector = Sector(name=idict['Sector'])
-            sector.save()
+#     inst_type = models.ForeignKey(
+#         InstType, on_delete=models.CASCADE, null=True
+#     )
 
-        try:
-            industry = Industry.objects.get(name=idict['Industry'])
-        except Industry.DoesNotExist:
-            industry = Industry(name=idict['Industry'])
-            industry.sector = sector
-            industry.save()
+#     def is_up_to_date(self):
+#         """Check if all the data is up to date."""
+#         res = False
+#         if self.hist_last_update and (
+#             self.hist_last_update - datetime.now()
+#         ).seconds < 24 * 3600:
+#             if self.details_last_update and (
+#                 self.details_last_update - datetime.now()
+#             ).seconds < 24 * 3600:
+#                 res = True
+#         return res
 
-        self.country = country
-        self.sector = sector
-        self.industry = industry
+#     def parse(self):
+#         """Parse self-related screener results from it's own raw data."""
+#         idict = json.loads(self.details)
 
-        if idict['Market Cap'] != '-':
-            mc = float(idict['Market Cap'][:-1])
-            mult = idict['Market Cap'][-1]
-            if mult == 'M':
-                mc *= 1000000
-            elif mult == 'B':
-                mc *= 1000000000
-            self.market_cap = mc
-        else:
-            self.market_cap = None
+#         self.company = idict['Company']
 
-        pes = idict['P/E']
-        if pes == '-':
-            pe = None
-        else:
-            pe = float(pes)
-        self.pe = pe
+#         try:
+#             country = Country.objects.get(name=idict['Country'])
+#         except Country.DoesNotExist:
+#             country = Country(name=idict['Country'])
+#             country.save()
 
-        pbs = idict['P/B']
-        if pbs == '-':
-            pb = None
-        else:
-            pb = float(pbs)
-        self.pb = pb
+#         try:
+#             sector = Sector.objects.get(name=idict['Sector'])
+#         except Sector.DoesNotExist:
+#             sector = Sector(name=idict['Sector'])
+#             sector.save()
 
-        pegs = idict['PEG']
-        if pegs == '-':
-            peg = None
-        else:
-            peg = float(pegs)
-        self.peg = peg
+#         try:
+#             industry = Industry.objects.get(name=idict['Industry'])
+#         except Industry.DoesNotExist:
+#             industry = Industry(name=idict['Industry'])
+#             industry.sector = sector
+#             industry.save()
 
-        epss = idict['EPS (ttm)']
-        if epss == '-':
-            eps = None
-        else:
-            eps = float(epss)
-        self.eps = eps
+#         self.country = country
+#         self.sector = sector
+#         self.industry = industry
 
-        eps_ny_g_s = idict.get('EPS next Y growth', '-')
-        if eps_ny_g_s == '-':
-            eps_ny_g = None
-        else:
-            eps_ny_g = float(eps_ny_g_s[:-1])
-        self.eps_next_year_growth = eps_ny_g
+#         if idict['Market Cap'] != '-':
+#             mc = float(idict['Market Cap'][:-1])
+#             mult = idict['Market Cap'][-1]
+#             if mult == 'M':
+#                 mc *= 1000000
+#             elif mult == 'B':
+#                 mc *= 1000000000
+#             self.market_cap = mc
+#         else:
+#             self.market_cap = None
 
-        eps_ty_g_s = idict['EPS this Y']
-        if eps_ty_g_s == '-':
-            eps_ty_g = None
-        else:
-            eps_ty_g = float(eps_ty_g_s[:-1])
-        self.eps_this_year_growth = eps_ty_g
+#         pes = idict['P/E']
+#         if pes == '-':
+#             pe = None
+#         else:
+#             pe = float(pes)
+#         self.pe = pe
 
-        eps_ny_s = idict['EPS next Y']
-        if eps_ny_s == '-':
-            eps_ny = None
-        else:
-            eps_ny = float(eps_ny_s)
-        self.eps_next_year = eps_ny
+#         pbs = idict['P/B']
+#         if pbs == '-':
+#             pb = None
+#         else:
+#             pb = float(pbs)
+#         self.pb = pb
 
-        sales_p5y_g_s = idict['Sales past 5Y']
-        if sales_p5y_g_s == '-':
-            sales_p5y_g = None
-        else:
-            sales_p5y_g = float(sales_p5y_g_s[:-1])
-        self.sales_past_5years_growth = sales_p5y_g
+#         pegs = idict['PEG']
+#         if pegs == '-':
+#             peg = None
+#         else:
+#             peg = float(pegs)
+#         self.peg = peg
 
-        divs = idict['Dividend']
-        if divs == '-':
-            div = None
-        else:
-            div = float(divs[:-1])
-        self.dividend = div
+#         epss = idict['EPS (ttm)']
+#         if epss == '-':
+#             eps = None
+#         else:
+#             eps = float(epss)
+#         self.eps = eps
 
-        roas = idict['ROA']
-        if roas == '-':
-            roa = None
-        else:
-            roa = float(roas[:-1])
-        self.roa = roa
+#         eps_ny_g_s = idict.get('EPS next Y growth', '-')
+#         if eps_ny_g_s == '-':
+#             eps_ny_g = None
+#         else:
+#             eps_ny_g = float(eps_ny_g_s[:-1])
+#         self.eps_next_year_growth = eps_ny_g
 
-        roes = idict['ROE']
-        if roes == '-':
-            roe = None
-        else:
-            roe = float(roes[:-1])
-        self.roe = roe
+#         eps_ty_g_s = idict['EPS this Y']
+#         if eps_ty_g_s == '-':
+#             eps_ty_g = None
+#         else:
+#             eps_ty_g = float(eps_ty_g_s[:-1])
+#         self.eps_this_year_growth = eps_ty_g
 
-        inst_owns = idict['Inst Own']
-        if inst_owns == '-':
-            inst_own = None
-        else:
-            inst_own = float(inst_owns[:-1])
-        self.inst_own = inst_own
+#         eps_ny_s = idict['EPS next Y']
+#         if eps_ny_s == '-':
+#             eps_ny = None
+#         else:
+#             eps_ny = float(eps_ny_s)
+#         self.eps_next_year = eps_ny
 
-        net_margins = idict['Profit Margin']
-        if net_margins == '-':
-            net_margin = None
-        else:
-            net_margin = float(net_margins[:-1])
-        self.net_margin = net_margin
+#         sales_p5y_g_s = idict['Sales past 5Y']
+#         if sales_p5y_g_s == '-':
+#             sales_p5y_g = None
+#         else:
+#             sales_p5y_g = float(sales_p5y_g_s[:-1])
+#         self.sales_past_5years_growth = sales_p5y_g
 
-        op_margins = idict['Oper. Margin']
-        if op_margins == '-':
-            op_margin = None
-        else:
-            op_margin = float(op_margins[:-1])
-        self.op_margin = op_margin
+#         divs = idict['Dividend']
+#         if divs == '-':
+#             div = None
+#         else:
+#             div = float(divs[:-1])
+#         self.dividend = div
 
-        recoms = idict['Recom']
-        if recoms == '-':
-            recom = None
-        else:
-            recom = float(recoms)
-        self.recom = recom
+#         roas = idict['ROA']
+#         if roas == '-':
+#             roa = None
+#         else:
+#             roa = float(roas[:-1])
+#         self.roa = roa
 
-        prs = idict['Price']
-        if prs == '-':
-            pr = None
-        else:
-            pr = float(idict['Price'])
-        self.price = pr
+#         roes = idict['ROE']
+#         if roes == '-':
+#             roe = None
+#         else:
+#             roe = float(roes[:-1])
+#         self.roe = roe
 
-        self.screen_scanned = True
-        self.screen_last_updated = datetime.now()
+#         inst_owns = idict['Inst Own']
+#         if inst_owns == '-':
+#             inst_own = None
+#         else:
+#             inst_own = float(inst_owns[:-1])
+#         self.inst_own = inst_own
 
-        # self.save()
+#         net_margins = idict['Profit Margin']
+#         if net_margins == '-':
+#             net_margin = None
+#         else:
+#             net_margin = float(net_margins[:-1])
+#         self.net_margin = net_margin
+
+#         op_margins = idict['Oper. Margin']
+#         if op_margins == '-':
+#             op_margin = None
+#         else:
+#             op_margin = float(op_margins[:-1])
+#         self.op_margin = op_margin
+
+#         recoms = idict['Recom']
+#         if recoms == '-':
+#             recom = None
+#         else:
+#             recom = float(recoms)
+#         self.recom = recom
+
+#         prs = idict['Price']
+#         if prs == '-':
+#             pr = None
+#         else:
+#             pr = float(idict['Price'])
+#         self.price = pr
+
+#         self.screen_scanned = True
+#         self.screen_last_updated = datetime.now()
+
+#         # self.save()
 
 
 class Capital(models.Model):
@@ -294,13 +305,13 @@ class Portfolio(models.Model):
     capital = models.ForeignKey(Capital, on_delete=models.CASCADE, null=True)
 
 
-class Share(models.Model):
+class Pie(models.Model):
     """Instrument-to-Portfolio relation."""
 
     portfolio = models.ForeignKey(
         Portfolio, on_delete=models.CASCADE, null=True
     )
-    inst = models.ForeignKey(Inst, on_delete=models.CASCADE, null=True)
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE, null=True)
 
 
 class EvoReport(models.Model):
@@ -340,7 +351,7 @@ class RawData(models.Model):
     author = models.CharField(max_length=20, null=True)
 
 
-class FundamentalEvent(models.Model):
+class Metric(models.Model):
     """Fundamental news from companies."""
 
     def __str__(self):
@@ -365,6 +376,17 @@ class ApiCall(models.Model):
 
 
 class Bar(models.Model):
+
+    def as_dict(self):
+        return ({
+            "open": self.o,
+            "close": self.c,
+            "high": self.h,
+            "low": self.l,
+            "volume": self.v,
+            "datetime": self.d
+        })
+
     o = models.FloatField(null=True)
     c = models.FloatField(null=True)
     h = models.FloatField(null=True)
@@ -372,3 +394,4 @@ class Bar(models.Model):
     v = models.IntegerField(null=True)
     s = models.CharField(max_length=10, null=True)
     d = models.DateField(null=True)
+    stock = models.ForeignKey(Stock, on_delete=models.SET_NULL, null=True)

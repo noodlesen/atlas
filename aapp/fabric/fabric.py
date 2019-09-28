@@ -9,6 +9,8 @@ from aapp.fabric.drawer import draw_chart
 
 from aapp.fabric.orm_reader import read_history_json
 
+from aapp.models import Bar
+
 
 class Asset():
     """Historical price data.
@@ -42,7 +44,13 @@ class Asset():
     def load_asset(self, symbol, itype, timeframe):
         """Load historical data from DB/server."""
         print('loading', symbol)
+
         self.data = read_history_json(symbol, itype, timeframe)
+
+        self.data = [
+            b.as_dict for b in Bar.objects.filter(symbol=symbol).order_by('d')
+        ]
+
         if self.data is None:
             return False
         else:
@@ -94,7 +102,7 @@ class Asset():
         data_to = None
         p = 0
         for tc in tcmap:
-            #print('P', p, self.count)
+            # print('P', p, self.count)
             if p < self.count:
                 if tc['datetime'] == self.data[p]["datetime"]:
                     tc["open"] = self.data[p]["open"]

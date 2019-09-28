@@ -1,17 +1,17 @@
 
 """Evo launcher."""
+import json
 
 from django.core.management.base import BaseCommand
 
 from aapp.fabric.evo2 import generate
 
-from aapp.fabric.orm_reader import load_settings_from_report
-
 from aapp.fabric.config import TS
 
 from aapp.fabric.fabric import Fabric
 
-from aapp.models import Inst
+from aapp.models import EvoReport
+
 
 USE_RANDOM = False
 
@@ -41,23 +41,26 @@ class Command(BaseCommand):
         if USE_RANDOM:
             params = TS.get_random_ts_params()
         else:
-            params = load_settings_from_report('R101')
+            # params = load_settings_from_report('R101')
+            # """Load Evo report from DB."""
+            r = EvoReport.objects.get(name='R101')
+            params = json.loads(r.raw_data)['input']
 
         symbols = []
-        #symbols = [i.ticker for i in Inst.objects.all()[10:20]]
+        # symbols = [i.ticker for i in Inst.objects.all()[10:20]]
         symbols.extend(TRENDY)
         # symbols.extend(CHANNEL)
         # symbols.extend(OTHER1)
-        #symbols.extend(OTHER2)
+        # symbols.extend(OTHER2)
         # symbols.extend(NEW)
 
         f = Fabric()
         f.load_data(symbols, 'ASTOCKS', 'DAILY')
         f.map_timecode()
-        #f.trim()
+        # f.trim()
         f.set_range_from_last(500)
 
-        if True: # f.check():
+        if True:  # f.check():
             generate(
                 f, GENERATIONS_COUNT, MUTATIONS, OUTSIDERS, DEPTH, STRATEGY,
                 initial_params=params, report=True, time_limit=TIME_LIMIT

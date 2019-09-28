@@ -21,7 +21,7 @@ def manage(f, symbol, all_trades, params):
         trade.update_trade(cc)
 
         if not trade.is_closed:
-            tp_base = sum([d['high'] for d in trade.data]) / len(trade.data)
+            # tp_base = sum([d['high'] for d in trade.data]) / len(trade.data)
             tp_base = sum([d['high'] for d in trade.data]) / len(trade.data)
             trade.takeprofit = tp_base * params.get('tp_koef', 2.1)
 
@@ -225,7 +225,6 @@ def open(f, symbol, trades, params):
                 trade = Trade()
                 trade.open_trade(
                     symbol,
-                    'BUY',
                     cc,
                     cc.close_price,
                     cc.low_price * params.get('init_sl_k', 0.98),

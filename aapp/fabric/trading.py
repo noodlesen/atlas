@@ -5,16 +5,13 @@ Basic trading functions.
 Dock for trading systems
 """
 
-from aapp.fabric.settings import RELATIVE
-
 
 class Trade():
     """One trade."""
 
     def __str__(self):
         """."""
-        return '%s | %r > %r | = %r [%s][%s] %r %r' % (
-            self.direction,
+        return '%r > %r | = %r [%s][%s] %r %r' % (
             self.open_price,
             self.close_price,
             self.profit,
@@ -45,7 +42,6 @@ class Trade():
         self.open_reason = None
         self.close_reason = None
 
-        self.direction = None
 
         self.is_open = False
         self.is_closed = False
@@ -58,11 +54,10 @@ class Trade():
         self.drawdown = None
 
     def open_trade(
-        self, symbol, direction, this_day,
+        self, symbol, this_day,
         price, stoploss, takeprofit, open_reason
     ):
         """Open new trade."""
-        self.direction = direction
         self.days += 1
         self.is_open = True
         self.symbol = symbol
@@ -84,20 +79,11 @@ class Trade():
         self.close_datetime = this_day.datetime
 
         delta = self.close_price - self.open_price
-        if self.direction:
-            if self.direction == 'BUY':
-                self.profit = delta
-                self.drawdown = self.open_price - min(
-                    [d['low'] for d in self.data]
-                )
-            elif self.direction == 'SELL':
-                self.profit = -1 * delta
-                self.drawdown = max(
-                    [d['high'] for d in self.data]
-                ) - self.open_price
-        if RELATIVE:
-            self.profit = self.profit / self.open_price * 100
-            self.drawdown = self.drawdown / self.open_price * 100
+
+        self.profit = delta
+        self.drawdown = self.open_price - min(
+            [d['low'] for d in self.data]
+        )
 
         self.is_open = False
         self.is_closed = True
@@ -117,18 +103,10 @@ class Trade():
         if this_day.low_price < self.low:
             self.low = this_day.low_price
 
-        if self.direction == 'BUY':
-            if this_day.low_price <= self.stoploss:
-                self.close_trade(this_day, self.stoploss, 'SL')
-            if this_day.high_price >= self.takeprofit:
-                self.close_trade(this_day, self.takeprofit, 'TP')
-        elif self.direction == 'SELL':
-            if this_day.high_price >= self.stoploss:
-                self.close_trade(this_day, self.stoploss, 'SL')
-            if this_day.low_price <= self.takeprofit:
-                self.close_trade(this_day, self.takeprofit, 'TP')
+        if this_day.low_price <= self.stoploss:
+            self.close_trade(this_day, self.stoploss, 'SL')
+        if this_day.high_price >= self.takeprofit:
+            self.close_trade(this_day, self.takeprofit, 'TP')
 
         if not self.is_closed:
             self.profit = this_day.close_price - self.open_price
-            if RELATIVE:
-                self.profit = self.profit / self.open_price * 100

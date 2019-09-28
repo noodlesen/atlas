@@ -11,7 +11,7 @@ import json
 from aapp.fabric.multitester import multitest
 from aapp.fabric.config import TS
 from datetime import datetime, timedelta
-from aapp.fabric.orm_reader import save_report
+from aapp.models import EvoReport
 
 
 def mutate(p, nm):
@@ -95,7 +95,6 @@ def generate(
             if ta:
                 offs.append({'input': m, 'output': ta})
 
-
         for off in offs:
 
             o_trades = off['output']['TRADES']
@@ -110,10 +109,6 @@ def generate(
             s_maxdd = survivor['output']['MAX_DRAWDOWN']
             s_roi = survivor['output']['ROI']
             s_pr = survivor['output']['PROFIT']
-
-            
-
-
 
             if o_trades > 0:
 
@@ -153,7 +148,6 @@ def generate(
                 if cond:
                     survivor = deepcopy(off)
 
-
         print(json.dumps(survivor['input'], sort_keys=True, indent=4))
         print(json.dumps(survivor['output'], sort_keys=True, indent=4))
         print('\n>>>>')
@@ -186,7 +180,9 @@ def generate(
 
     if kwargs.get('report', False):
 
-        save_report(stamp)
+        # save_report(stamp)
+        r = EvoReport(name=stamp)
+        r.save()
 
         kwargs['draw'] = False
         kwargs['verbose'] = True
