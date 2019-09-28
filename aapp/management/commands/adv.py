@@ -20,7 +20,11 @@ class Command(BaseCommand):
         events = FundamentalEvent.objects.all()
 
         print(len(events))
+        ex_tickers = [i.ticker for i in Inst.objects.all()]
         all_tickers = list(set([e.symbol for e in events if e.symbol != '']))
+
+        all_tickers = [t for t in all_tickers if t not in ex_tickers]
+
 
         print(all_tickers)
         print(len(all_tickers))

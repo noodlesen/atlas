@@ -13,8 +13,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """A Django command body."""
-        Bar.objects.all().delete()
-        insts = Inst.objects.all()[:10]
-        f = Fabric()
-        allsyms = [i.ticker for i in insts]
-        f.load_data(allsyms, 'ASTOCKS', 'DAILY')
+        sb = Bar.objects.filter(s='SPY').order_by('-d')
+        for d in sb:
+            print (d.d)
+            bars = [b.s for b in Bar.objects.filter(c__gt=20, c__lte=25, d=d.d)]
+            print(bars)

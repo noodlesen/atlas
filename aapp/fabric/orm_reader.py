@@ -23,7 +23,6 @@ def load_settings_from_report(path):
 def read_history_json(symbol, itype, timeframe, **kwargs):
     """Read history data from DB."""
     adj = kwargs.get('adjusted', False)
-    save_bar = kwargs.get('bar', False)
 
     if itype == 'ASTOCKS':
         if timeframe == 'DAILY':
@@ -34,7 +33,7 @@ def read_history_json(symbol, itype, timeframe, **kwargs):
         if timeframe == '60MIN':
             dk = "Time Series FX (60min)"
 
-    if sentinel.check([symbol]):
+    if True:  #sentinel.check([symbol]):
         
         inst = Inst.objects.get(ticker=symbol)
         hdata = json.loads(inst.history)[dk]
@@ -73,21 +72,5 @@ def read_history_json(symbol, itype, timeframe, **kwargs):
             if bar["datetime"].weekday() != 5:
                 # исключаем субботы (для FX)
                 res_data.append(bar)
-
-            if save_bar:
-                try:
-                    Bar.objects.get(d=bar['datetime'].date(), s=symbol)
-                except Bar.DoesNotExist:
-                    b = Bar()
-                    b.o = bar['open']
-                    b.c = bar['close']
-                    b.h = bar['high']
-                    b.l = bar['low']
-                    b.v = bar['volume']
-                    b.d = bar['datetime'].date()
-                    b.s = symbol
-                    b.save()
-                else:
-                    print("BAR EXISTS")
 
         return res_data
