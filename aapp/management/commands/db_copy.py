@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from time import sleep
 import requests
-from aapp.models import Bar, Industry, Sector, Stock, Metric
+from aapp.models import Bar, Industry, Sector, Stock, Metric, Day
 from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
@@ -95,10 +95,28 @@ class Command(BaseCommand):
         #     )
         #     s.save()
 
-        bars = Bar.objects.all()
-        bc = bars.count()
-        for i, b in enumerate(bars):
-            b.stock = Stock.objects.get(symbol=b.s)
-            b.save()
-            print(int(i / bc * 100), '%')
+        # bars = Bar.objects.all()
+        # bc = bars.count()
+        # for i, b in enumerate(bars):
+        #     b.stock = Stock.objects.get(symbol=b.s)
+        #     b.save()
+        #     print(int(i / bc * 100), '%')
+
+        # ms = METRICS.find({})
+        # for m in ms:
+        #     print(m['symbol'], m['name'])
+        #     st = Stock.objects.get(symbol=m['symbol'])
+        #     mo = Metric(
+        #         stock=st,
+        #         date=m['date'].date(),
+        #         name=m['name'],
+        #         value=m['value'],
+        #         simfin_id=m['simfin_id'],
+        #         simfin_industry_code=m['industry_code']
+        #     )
+        #     mo.save()
+
+        print(Metric.objects.all().count())
+
+
  

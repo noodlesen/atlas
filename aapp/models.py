@@ -62,12 +62,14 @@ class Metric(models.Model):
             '%s %s %r %r' % (self.symbol, self.name, self.value, self.date)
         )
 
-    symbol = models.CharField(max_length=10, null=True)
+    # symbol = models.CharField(max_length=10, null=True)
+    stock = models.ForeignKey(Stock, on_delete=models.SET_NULL, null=True)
     simfin_id = models.IntegerField(null=True)
-    industry_code = models.IntegerField(null=True)
+    simfin_industry_code = models.IntegerField(null=True)
     name = models.CharField(max_length=255, null=True)
     value = models.FloatField(null=True)
     date = models.DateField(null=True)
+    # day = models.IntegerField(null=True)
 
 
 class Bar(models.Model):
@@ -91,5 +93,5 @@ class Bar(models.Model):
     v = models.IntegerField(null=True)
     d = models.DateField(null=True)
     stock = models.ForeignKey(Stock, on_delete=models.SET_NULL, null=True)
-    #day = models.ForeignKey(Day, on_delete=models.SET_NULL, null=True)
+    # day = models.ForeignKey(Day, on_delete=models.SET_NULL, null=True)
     day = models.IntegerField(null=True)
