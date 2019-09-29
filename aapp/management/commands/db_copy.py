@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from time import sleep
 import requests
-from aapp.models import Bar, Industry, Sector, Stock
+from aapp.models import Bar, Industry, Sector, Stock, Metric
 from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):

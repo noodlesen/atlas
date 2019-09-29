@@ -3,6 +3,13 @@
 from django.db import models
 
 
+class Day(models.Model):
+    """A trading day."""
+
+    number = models.IntegerField(null=True)
+    date = models.DateField(null=True)
+
+
 class Sector(models.Model):
     """A group of industries."""
 
@@ -44,7 +51,6 @@ class Stock(models.Model):
     company = models.CharField(max_length=100, null=True)
     symbol = models.CharField(max_length=10, null=True)
     industry = models.ForeignKey(Industry, on_delete=models.CASCADE, null=True)
-    # country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
 
 
 class Metric(models.Model):
@@ -65,8 +71,10 @@ class Metric(models.Model):
 
 
 class Bar(models.Model):
+    """Single day price bar."""
 
     def as_dict(self):
+        """Price data as a dict."""
         return ({
             "open": self.o,
             "close": self.c,
@@ -83,3 +91,5 @@ class Bar(models.Model):
     v = models.IntegerField(null=True)
     d = models.DateField(null=True)
     stock = models.ForeignKey(Stock, on_delete=models.SET_NULL, null=True)
+    #day = models.ForeignKey(Day, on_delete=models.SET_NULL, null=True)
+    day = models.IntegerField(null=True)

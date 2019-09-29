@@ -4,16 +4,6 @@ import datetime
 
 from django.db import models
 from aapp.models import Stock
-from webfront_models import RawData
-
-
-class ApiCall(models.Model):
-    """Every registered API call."""
-
-    api = models.CharField(max_length=50, null=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    success = models.BooleanField(null=True)
-    response = models.ForeignKey(RawData, on_delete=models.SET_NULL, null=True)
 
 
 class RawData(models.Model):
@@ -24,6 +14,15 @@ class RawData(models.Model):
     data = models.TextField(null=True)
     data_type = models.CharField(max_length=20, null=True)
     author = models.CharField(max_length=20, null=True)
+
+
+class ApiCall(models.Model):
+    """Every registered API call."""
+
+    api = models.CharField(max_length=50, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    success = models.BooleanField(null=True)
+    response = models.ForeignKey(RawData, on_delete=models.SET_NULL, null=True)
 
 
 class FVDetails(models.Model):

@@ -7,7 +7,7 @@ import requests
 
 from time import sleep
 
-from aapp.models import RawData
+from aapp.webfront_models import RawData
 
 from bs4 import BeautifulSoup
 
