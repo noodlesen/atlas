@@ -11,7 +11,7 @@ import json
 from aapp.fabric.multitester import multitest
 from aapp.fabric.config import TS
 from datetime import datetime, timedelta
-from aapp.models import EvoReport
+from aapp.evo_models import EvoReport
 
 
 def mutate(p, nm):

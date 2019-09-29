@@ -10,7 +10,7 @@ from aapp.fabric.config import TS
 
 from aapp.fabric.fabric import Fabric
 
-from aapp.models import EvoReport
+from aapp.evo_models import EvoReport
 
 
 USE_RANDOM = False

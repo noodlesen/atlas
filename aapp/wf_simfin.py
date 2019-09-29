@@ -1,4 +1,4 @@
-from aapp.models import FundamentalEvent
+from aapp.models import Metric
 from datetime import datetime
 
 def load_bulk_data(fn):
@@ -7,7 +7,7 @@ def load_bulk_data(fn):
         lnum = len(lines)
         for i, l in enumerate(lines):
             print('%d/%d' % (i, lnum))
-            e = FundamentalEvent()
+            e = Metric()
             e.symbol = l[0]
             e.simfin_id = int(l[1])
             e.industry_code = int(l[2])
