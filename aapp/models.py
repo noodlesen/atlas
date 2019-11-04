@@ -59,7 +59,9 @@ class Metric(models.Model):
     def __str__(self):
         """."""
         return (
-            '%s %s %r %r' % (self.symbol, self.name, self.value, self.date)
+            '%s %s %r %r' % (
+                self.stock.symbol, self.name, self.value, self.date
+            )
         )
 
     # symbol = models.CharField(max_length=10, null=True)
@@ -69,7 +71,8 @@ class Metric(models.Model):
     name = models.CharField(max_length=255, null=True)
     value = models.FloatField(null=True)
     date = models.DateField(null=True)
-    # day = models.IntegerField(null=True)
+    day = models.IntegerField(null=True)
+    imprecise = models.BooleanField(default=False)
 
 
 class Bar(models.Model):
