@@ -1,9 +1,9 @@
 
 """Run some command."""
 
+import datetime
 from django.core.management.base import BaseCommand
-from aapp.models import Metric, Day, Bar, Stock
-
+from aapp.models import Day, Bar, Stock
 
 
 class Command(BaseCommand):
@@ -11,13 +11,18 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """A Django command body."""
-        ds = list(set([m.date for m in Metric.objects.filter(imprecise=True)]))
-        print(len(ds))
-        spy = Stock.objects.get(symbol='ADBE')
-        for d in ds:
-            try:
-                b = Bar.objects.get(stock=spy, d=d)
-            except Bar.DoesNotExist:
-                print('NONE')
-            else:
-                print(d)
+        st = Stock.objects.get(symbol='AAPL')
+        dtf = datetime.date(2016, 1, 1)
+        dtt = datetime.date(2017, 12, 31)
+        days = [
+            d.number for d in Day.objects.filter(date__gte=dtf, date__lte=dtt)
+        ]
+        bars = Bar.objects.filter(
+            day__gte=min(days),
+            day__lte=max(days),
+            stock=st
+        )
+        for b in bars:
+            print(b.d, b.c)
+        # for d in days:
+        #     print(d.date, Bar.objects.get(stock=st, day=d.number).c)
