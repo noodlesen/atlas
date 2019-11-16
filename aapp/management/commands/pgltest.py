@@ -6,18 +6,37 @@ from django.core.management.base import BaseCommand
 from aapp.models import Day, Bar, Stock
 from aapp.pgllib import C, Mob, Pgl, DEFAULT_W, DEFAULT_H
 
+class DataType():
+    SIMPLE = 0
+    BARS = 1
+
+class DataSet():
+
+    def __init__(self):
+        data = []
+        datatype = None
+        length = 0
+        name = None
+
+    def load(self, name, datalist, datatype):
+        self.data = datalist
+        self.name = name
+        self.data_type = datatype
+        self.length = len(datalist)
+
 
 class Chart(Mob):
 
     def __init__(self, pgl):
-        self.points = []
+        self.datasets = []
         self.pfrom = 0
         self.pto = 0
         self.count = 0
         self.context = pgl
+        self.datasets_to_draw = []
 
-    def load_points(self, pp):
-        self.points = pp
+    def load_dataset(self, ds, **kwargs):
+        self.datasets.append(ds)
         self.pfrom = 0
         l = len(self.points)
         self.pto = l-1
@@ -112,7 +131,17 @@ class Command(BaseCommand):
         @pgl.window.event
         def on_mouse_motion(x, y, dx, dy):
             pass
+            # for v in pgl.vobs:
+            #     if v.mob == chh:
+            #         for n in range(0, len(v.vl.vertices)):
+            #             if n%2==1:
+            #                 v.vl.vertices[n] = y
+            #     if v.mob == chv:
+            #         for n in range(0, len(v.vl.vertices)):
+            #             if n%2==0:
+            #                 v.vl.vertices[n] = x
 
+            # pgl.batch.draw_subset([v.vl for v in chvl])
 
 
         @pgl.window.event
@@ -135,14 +164,13 @@ class Command(BaseCommand):
                 chart.rebuild()
 
 
+        symbol = 'AAPL'
+        bars = Bar.objects.filter(stock=Stock.objects.get(symbol=symbol)).order_by('d')
 
-        #ADD POINTS
-
-        bars = [b.c for b in Bar.objects.filter(stock=Stock.objects.get(symbol='AAPL')).order_by('d')]
-
-        chart.load_points(bars)
+        chart.load_dataset(symbol+'_bars', bars, DataType.BARS, on=True)
         chart.set_from(50)
         chart.set_count(1000)
         chart.rebuild()
+
 
         pgl.run()

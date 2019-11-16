@@ -13,7 +13,11 @@ def cci(data, n=0):
         n = len(data)
     tp_price_list = [typical_price(d) for d in data]
     tp_avg = sum(tp_price_list) / n
-    md = sum([abs(tp_avg - tp) for tp in tp_price_list]) / 3
+    md = sum(
+        [
+            abs(tp_avg - tp) for tp in tp_price_list
+        ]
+    ) / 3
     md = 0.0000001 if md == 0 else md
     return round((typical_price(data[-1]) - tp_avg) / (0.015 * md), 2)
 

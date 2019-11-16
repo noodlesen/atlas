@@ -55,7 +55,7 @@ class Pgl():
         self.w = kwargs.get('w', DEFAULT_W)
         self.h = kwargs.get('h', DEFAULT_H)
         self.window = pyglet.window.Window(self.w, self.h)
-        self.window.set_mouse_visible(False)
+        #self.window.set_mouse_visible(False)
         self.batch = pyglet.graphics.Batch()
         self.vobs = []
         self.mobs = []
