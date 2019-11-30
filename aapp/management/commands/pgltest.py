@@ -12,11 +12,11 @@ class DataType():
 
 class DataSet():
 
-    def __init__(self):
-        data = []
-        datatype = None
-        length = 0
-        name = None
+    def __init__(self, name, data, datatype):
+        self.data = data
+        self.datatype = datatype
+        self.length = len(self.data)
+        self.name = name
 
     def load(self, name, datalist, datatype):
         self.data = datalist
@@ -38,15 +38,17 @@ class Chart(Mob):
     def load_dataset(self, ds, **kwargs):
         self.datasets.append(ds)
         self.pfrom = 0
-        l = len(self.points)
-        self.pto = l-1
+        l = len(ds.data)
+        self.pto = l - 1
         self.count = l
+        if kwargs.get('on', False):
+            self.datasets_to_draw.append(ds)
 
 
     def set_count(self, c):
         self.count = c
         self.pto = self.pfrom + c
-        l = len(self.points)
+        l = min([ds.length for ds in self.datasets])
         if self.pto >= l:
             self.pto = l-1
             self.pfrom = self.pto - c
@@ -92,16 +94,21 @@ class Chart(Mob):
                 except AssertionError:
                     pass
                 del v
+        for ds in self.datasets:
 
-        pts = self.points[self.pfrom:self.pto]
-        pmax = max(pts)
-        pmin = min(pts)
-        sw = self.context.w/self.count  # slot width
+            if ds.datatype == DataType.SIMPLE:
+                pts = ds.data[self.pfrom:self.pto]
+            elif ds.datatype == DataType.BARS:
+                points = [b.c for b in ds.data]
+                pts = points[self.pfrom:self.pto]
+            pmax = max(pts)
+            pmin = min(pts)
+            sw = self.context.w/self.count  # slot width
 
-        for i, p in enumerate(pts):
-            dx = (i+0.5)*sw
-            dy = (p-pmin)/(pmax-pmin) * self.context.h*0.9 + self.context.h*0.05
-            self.context.draw_point2d(C(dx, dy), 5, mob=self)
+            for i, p in enumerate(pts):
+                dx = (i+0.5)*sw
+                dy = (p-pmin)/(pmax-pmin) * self.context.h*0.9 + self.context.h*0.05
+                self.context.draw_point2d(C(dx, dy), 5, mob=self)
 
 
         self.context.window.clear()
@@ -163,14 +170,14 @@ class Command(BaseCommand):
                 chart.grow(-1)
                 chart.rebuild()
 
-
         symbol = 'AAPL'
-        bars = Bar.objects.filter(stock=Stock.objects.get(symbol=symbol)).order_by('d')
-
-        chart.load_dataset(symbol+'_bars', bars, DataType.BARS, on=True)
+        bars = Bar.objects.filter(
+            stock=Stock.objects.get(symbol=symbol)
+        ).order_by('d')
+        bars = DataSet(symbol + '_bars', bars, DataType.BARS)
+        chart.load_dataset(bars, on=True)
         chart.set_from(50)
         chart.set_count(1000)
         chart.rebuild()
-
 
         pgl.run()
