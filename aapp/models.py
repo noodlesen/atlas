@@ -1,6 +1,7 @@
 """Atlas app Django models."""
 
 from django.db import models
+from aapp.fabric.candlesticks import Candle
 
 
 class Day(models.Model):
@@ -88,6 +89,19 @@ class Bar(models.Model):
             "volume": self.v,
             "datetime": self.d
         })
+
+    def as_candle(self):
+        """Price data as a Candle object."""
+        return (
+            Candle(
+                high=self.h,
+                low=self.l,
+                open=self.o,
+                close=self.c,
+                volume=self.v,
+                datetime=self.d
+            )
+        )
 
     o = models.FloatField(null=True)
     c = models.FloatField(null=True)
