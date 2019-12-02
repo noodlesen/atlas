@@ -16,6 +16,7 @@ def ts_name():
 def manage(f, symbol, all_trades, params):
     """Managing existing market positions."""
     cc = f.get(symbol)
+    #print(symbol, cc)
     trades = [t for t in all_trades if t.symbol == symbol and t.is_open]
     for trade in trades:
         trade.update_trade(cc)

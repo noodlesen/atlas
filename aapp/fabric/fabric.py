@@ -7,7 +7,7 @@ from aapp.fabric.candlesticks import Candle, Figure
 
 from aapp.fabric.drawer import draw_chart
 
-from aapp.models import Bar
+from aapp.models import Bar, Stock
 
 
 class Asset():
@@ -42,12 +42,13 @@ class Asset():
     def load_asset(self, symbol, itype, timeframe):
         """Load historical data from DB/server."""
         print('loading', symbol)
-
+        stock = Stock.objects.get(symbol=symbol)
         self.data = [
-            b.as_dict for b in Bar.objects.filter(symbol=symbol).order_by('d')
+            b.as_dict() for b in Bar.objects.filter(stock=stock).order_by('d')
         ]
 
         if self.data is None:
+            print('asset loading error!')
             return False
         else:
             self.count = len(self.data)

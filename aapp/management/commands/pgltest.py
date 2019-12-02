@@ -2,6 +2,7 @@
 """Run some command."""
 
 import datetime
+from random import randint
 from django.core.management.base import BaseCommand
 from aapp.models import Day, Bar, Stock
 from aapp.pgllib import C, Mob, Pgl, DEFAULT_W, DEFAULT_H
@@ -18,6 +19,9 @@ class DataSet():
         self.length = len(self.data)
         self.name = name
 
+    def __str__(self):
+        return(self.name+str(len(self.data))+' ' +str(self.datatype))
+
     def load(self, name, datalist, datatype):
         self.data = datalist
         self.name = name
@@ -31,26 +35,38 @@ class Chart(Mob):
         self.datasets = []
         self.pfrom = 0
         self.pto = 0
-        self.count = 0
+        self.min_len = 0
+        self.max_len = 0
         self.context = pgl
         self.datasets_to_draw = []
+        self.colors = {}
 
     def load_dataset(self, ds, **kwargs):
         self.datasets.append(ds)
+        print('Chart loaded', ds)
         self.pfrom = 0
-        l = len(ds.data)
-        self.pto = l - 1
-        self.count = l
+        dsl = [d.length for d in self.datasets]
+        self.min_len = min(dsl)
+        self.max_len = max(dsl)
+        self.pto = self.min_len - 1
+        self.count = self.min_len
         if kwargs.get('on', False):
             self.datasets_to_draw.append(ds)
+        carg = kwargs.get('color', False)
+        if carg:
+            self.colors[ds.name] = carg
+
+
+    def get_dataset_color(self, dsname):
+        return self.colors.get(dsname, (255,255,255))
+
 
 
     def set_count(self, c):
         self.count = c
         self.pto = self.pfrom + c
-        l = min([ds.length for ds in self.datasets])
-        if self.pto >= l:
-            self.pto = l-1
+        if self.pto >= self.min_len:
+            self.pto = self.min_len - 1
             self.pfrom = self.pto - c
 
     def set_from(self, f):
@@ -62,17 +78,16 @@ class Chart(Mob):
         self.count = self.pto - self.pfrom
 
     def shift(self, offset):
-        npf  = self.pfrom + offset
+        npf = self.pfrom + offset
         if npf > 0:
             self.pfrom = npf
         else:
             self.pfrom = 0
         npt = self.pto+offset
-        l = len(self.points)
-        if npt < l-1:
+        if npt < self.min_len-1:
             self.pto = npt
         else:
-            self.pto = l-1
+            self.pto = self.min_len-1
         self.count = self.pto - self.pfrom
 
     def grow(self, n=1):
@@ -80,9 +95,8 @@ class Chart(Mob):
         self.pto += n
         if self.pfrom < 0:
             self.pfrom = 0
-        l = len(self.points)
-        if self.pto >= l:
-            self.pto = l-1
+        if self.pto >= self.min_len:
+            self.pto = self.min_len-1
         self.count = self.pto - self.pfrom
 
     def rebuild(self):
@@ -96,6 +110,8 @@ class Chart(Mob):
                 del v
         for ds in self.datasets:
 
+            color = self.get_dataset_color(ds.name)
+
             if ds.datatype == DataType.SIMPLE:
                 pts = ds.data[self.pfrom:self.pto]
             elif ds.datatype == DataType.BARS:
@@ -108,7 +124,7 @@ class Chart(Mob):
             for i, p in enumerate(pts):
                 dx = (i+0.5)*sw
                 dy = (p-pmin)/(pmax-pmin) * self.context.h*0.9 + self.context.h*0.05
-                self.context.draw_point2d(C(dx, dy), 5, mob=self)
+                self.context.draw_point2d(C(dx, dy), 5, mob=self, c=color)
 
 
         self.context.window.clear()
@@ -133,7 +149,7 @@ class Command(BaseCommand):
 
         @pgl.window.event
         def on_draw():
-            pass
+            chart.rebuild()
 
         @pgl.window.event
         def on_mouse_motion(x, y, dx, dy):
@@ -170,14 +186,17 @@ class Command(BaseCommand):
                 chart.grow(-1)
                 chart.rebuild()
 
-        symbol = 'AAPL'
-        bars = Bar.objects.filter(
-            stock=Stock.objects.get(symbol=symbol)
-        ).order_by('d')
-        bars = DataSet(symbol + '_bars', bars, DataType.BARS)
-        chart.load_dataset(bars, on=True)
+
+        symbols = ['AAPL', 'ADBE', 'SPY']
+        for s in symbols:
+            bars = Bar.objects.filter(
+                stock=Stock.objects.get(symbol=s)
+            ).order_by('d')
+            bars = DataSet(s + '_bars', bars, DataType.BARS)
+            chart.load_dataset(bars, on=True, color=(randint(80,255),randint(80,255),randint(80,255)))
         chart.set_from(50)
-        chart.set_count(1000)
+        chart.set_count(200)
         chart.rebuild()
 
         pgl.run()
+
