@@ -47,7 +47,7 @@ class Stock(models.Model):
 
     def __str__(self):
         """."""
-        return('%s [%s]' % (self.company, self.symbol))
+        return('%s <%s>' % (self.company, self.symbol))
 
     company = models.CharField(max_length=100, null=True)
     symbol = models.CharField(max_length=10, null=True)
@@ -99,7 +99,8 @@ class Bar(models.Model):
                 open=self.o,
                 close=self.c,
                 volume=self.v,
-                datetime=self.d
+                datetime=self.d,
+                stock=self.stock
             )
         )
 

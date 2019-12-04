@@ -22,6 +22,7 @@ class Candle():
             self.close_price = kwargs['close']
             self.volume = kwargs.get('volume', 0)
             self.datetime = kwargs.get('datetime', None)
+            self.stock = kwargs.get('stock', None)
 
     def __str__(self):
         """."""

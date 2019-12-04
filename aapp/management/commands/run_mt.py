@@ -125,15 +125,15 @@ class Command(BaseCommand):
         #     'EXPO', 'TLP', 'MMT', 'LION', 'ATI', 'MYGN'
         # ]
         # symbols = ['BA', 'ADBE', 'CAT', 'INTC', 'AAPL']
-        #sel = ['BA', 'ADBE', 'CAT', 'INTC', 'AAPL']
-        stocks = Stock.objects.all()
-        sel = [s.symbol for s in sample(list(stocks), 20)]
+        sel = ['KO']
+        #stocks = Stock.objects.all()
+        #sel = [s.symbol for s in sample(list(stocks), 20)]
         f = Fabric()
         f.load_data(sel, 'ASTOCKS', 'DAILY')
         f.map_timecode()
         #f.trim()
         #if f.check():
-        f.set_range_from_last(500)
+        f.set_range_from_last(4750)
         #params = load_settings_from_report('R101')
         params = json.loads(par)['input']
         print(params)

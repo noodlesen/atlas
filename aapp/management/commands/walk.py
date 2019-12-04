@@ -19,12 +19,12 @@ class Trade():
 
     def open(self, b, **kwargs):
         at_open = kwargs.get('at_open', False)
-        price = b.o if at_open else b.c
+        price = b.open_price if at_open else b.close_price
         if not self.active and not self.closed:
             self.active = True
             self.closed = False
             self.open_price = price
-            self.open_date = b.d
+            self.open_date = b.datetime
             self.profit = 0
             self.stock = b.stock
             return True
@@ -34,12 +34,12 @@ class Trade():
 
     def close(self,b,**kwargs):
         at_open = kwargs.get('at_open', False)
-        price = b.o if at_open else b.c
+        price = b.open_price if at_open else b.close_price
         if self.active and not self.closed:
             self.active = False
             self.closed = True
             self.close_price = price
-            self.close_date = b.d
+            self.close_date = b.datetime
             self.profit = self.close_price - self.open_price
             return True
         else:
@@ -54,7 +54,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """A Django command body."""
-        st = Stock.objects.get(symbol='ADBE')
+
+        st = Stock.objects.get(symbol='KO')
         dtf = datetime.date(2000, 1, 1)
         dtt = datetime.date(2017, 12, 31)
         days = [
@@ -65,16 +66,17 @@ class Command(BaseCommand):
             day__lte=max(days),
             stock=st
         )
+        bars = [b.as_candle() for b in bars]
 
         trades = []
         last_bar = None
-        for b in bars:
-            print(b.d, b.c, b.day)
-            if b.as_candle().is_hammer():
+        for i,d in enumerate(days):
+            b = bars[i]
+            if b.is_hammer():
                 t = Trade()
                 t.open(b)
                 trades.append(t)
-            if b.as_candle().is_shooting_star():
+            if b.is_shooting_star():
                 for t in trades:
                     if t.active:
                         t.close(b)
